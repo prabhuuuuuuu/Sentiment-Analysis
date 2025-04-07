@@ -3,54 +3,137 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.layers import Dropout
 import numpy as np
 
-reviews = [
-    "Absolutely fantastic! Highly recommend.",
-    "Great value for the price.",
-    "Exceeded my expectations in every way.",
-    "Very pleased with the quality and performance.",
-    "I would definitely buy this again.",
-    "Top-notch product, well built and reliable.",
-    "Fast delivery and excellent condition.",
-    "Love it! Will recommend to my friends.",
-    "Solid build and works like a charm.",
-    "Customer service was excellent and responsive."
+positive_reviews = [
+    "Absolutely love this product!",
+    "Exceeded my expectations, works perfectly.",
+    "High quality and great performance.",
+    "Five stars! Would buy again.",
+    "Amazing value for the price.",
+    "Super happy with this purchase.",
+    "Product is exactly as described. Perfect!",
+    "Fast shipping and excellent packaging.",
+    "Highly recommend to anyone.",
+    "I am very satisfied with this item.",
+    "Impressive build and smooth operation.",
+    "Very pleased, no complaints at all.",
+    "This is a game-changer!",
+    "One of the best purchases I've made.",
+    "Fantastic design and functionality.",
+    "Product feels premium and sturdy.",
+    "Works like a charm, thank you!",
+    "Everything about this is perfect.",
+    "Will definitely buy more in the future.",
+    "So convenient and reliable.",
+    "Awesome experience overall.",
+    "Customer service was top-notch.",
+    "Love how easy it is to use.",
+    "Looks great and performs even better.",
+    "Exactly what I needed.",
+    "Easy setup and very intuitive.",
+    "Beautifully made, great attention to detail.",
+    "So impressed with the quality.",
+    "Totally worth the money.",
+    "Even better than expected!",
+    "Super efficient and compact.",
+    "I’m very happy with my choice.",
+    "Really stands out among competitors.",
+    "The results are fantastic!",
+    "Amazing performance, highly efficient.",
+    "Fast, reliable, and affordable.",
+    "Delivered on all its promises.",
+    "Couldn't ask for more.",
+    "Very impressed with this product.",
+    "Love the features and the build.",
+    "This has been a great investment.",
+    "Solid quality and affordable price.",
+    "My go-to choice now.",
+    "User-friendly and powerful.",
+    "The best I've used so far.",
+    "Great support and documentation.",
+    "Performance is outstanding.",
+    "Very practical and well-designed.",
+    "Exactly as advertised.",
+    "Highly dependable and easy to use.",
 ]
 
-labels = [1] * len(reviews)
-
-reviews += [
-    "Horrible experience, do not buy!",
-    "Completely broke after first use.",
-    "Not as advertised, very disappointed.",
-    "Cheap materials and poor design.",
-    "Terrible customer service and support.",
-    "I regret buying this.",
-    "Doesn't work properly, total waste of money.",
-    "Stopped working after a week.",
-    "Too expensive for such poor quality.",
-    "Arrived damaged and unusable."
+negative_reviews = [
+    "Terrible product, don’t buy!",
+    "Did not work as expected.",
+    "Poor quality and very flimsy.",
+    "Waste of money.",
+    "Completely disappointed with this.",
+    "Doesn’t match the description.",
+    "Very frustrating experience.",
+    "Would not recommend to anyone.",
+    "Regret this purchase deeply.",
+    "Feels cheap and unreliable.",
+    "Stopped working after a few days.",
+    "It broke after minimal use.",
+    "Overpriced and underwhelming.",
+    "Packaging was damaged, product too.",
+    "Not user-friendly at all.",
+    "Unacceptable quality control.",
+    "Highly dissatisfied.",
+    "This is just junk.",
+    "Extremely poor build.",
+    "Does not do what it claims.",
+    "Save your money.",
+    "Hard to set up and use.",
+    "Very loud and annoying.",
+    "Performance is below average.",
+    "Looks cheap and acts cheap.",
+    "Doesn't hold up over time.",
+    "Support was not helpful.",
+    "One of the worst purchases ever.",
+    "Avoid at all costs!",
+    "Not worth even a dollar.",
+    "The item arrived broken.",
+    "Definitely wouldn’t buy again.",
+    "Feels like a scam.",
+    "No instructions included.",
+    "Did more harm than good.",
+    "Parts missing on arrival.",
+    "Battery life is a joke.",
+    "Doesn’t work with my device.",
+    "Very disappointed in the brand.",
+    "Completely useless product.",
+    "Seems used, not new.",
+    "Rattles and shakes constantly.",
+    "Doesn't power on consistently.",
+    "Was excited but totally let down.",
+    "Not durable at all.",
+    "Very slow and glitchy.",
+    "It’s just not worth it.",
+    "Extremely dissatisfied with the quality.",
+    "Returned it the next day.",
+    "This product is a disaster."
 ]
 
-labels += [0] * 10
+reviews = positive_reviews + negative_reviews
+labels = [1] * len(positive_reviews) + [0] * len(negative_reviews)
 
-tokenizer = Tokenizer(num_words = 1000)
+
+labels = np.array(labels)
+
+tokenizer = Tokenizer(num_words = 3000)
 tokenizer.fit_on_texts(reviews)
 sequences = tokenizer.texts_to_sequences(reviews)
-data = pad_sequences(sequences, maxlen = 20)
+data = pad_sequences(sequences, maxlen = 30)
 
 
 model = Sequential([
-    Dense(units = 25, activation = 'sigmoid', input_shape = (20)),
-    Dense(units = 15, activation = 'sigmoid'),
+    Dense(units = 25, activation = 'relu', input_shape = (30,)), Dropout(0.3),
+    Dense(units = 15, activation = 'relu'),
     Dense(units = 1, activation = 'sigmoid')
 ])
 
 
 model.compile(optimizer = 'adam', loss = 'binary_crossentropy', metrics = ['accuracy'])
 
-model.fit(data, labels, epochs=100, verbose = 0)
+model.fit(data, labels, epochs=20, validation_split=0.2, batch_size=4)
 
 #for test
 new_reviews = [
@@ -60,7 +143,7 @@ new_reviews = [
 
 new_sequences = tokenizer.texts_to_sequences(new_reviews)
 
-new_data = pad_sequences(new_sequences, maxlen = 20)
+new_data = pad_sequences(new_sequences, maxlen = 30)
 
 predictions = model.predict(new_data)
 
