@@ -1,0 +1,71 @@
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+import numpy as np
+
+reviews = [
+    "Absolutely fantastic! Highly recommend.",
+    "Great value for the price.",
+    "Exceeded my expectations in every way.",
+    "Very pleased with the quality and performance.",
+    "I would definitely buy this again.",
+    "Top-notch product, well built and reliable.",
+    "Fast delivery and excellent condition.",
+    "Love it! Will recommend to my friends.",
+    "Solid build and works like a charm.",
+    "Customer service was excellent and responsive."
+]
+
+labels = [1] * len(reviews)
+
+reviews += [
+    "Horrible experience, do not buy!",
+    "Completely broke after first use.",
+    "Not as advertised, very disappointed.",
+    "Cheap materials and poor design.",
+    "Terrible customer service and support.",
+    "I regret buying this.",
+    "Doesn't work properly, total waste of money.",
+    "Stopped working after a week.",
+    "Too expensive for such poor quality.",
+    "Arrived damaged and unusable."
+]
+
+labels += [0] * 10
+
+tokenizer = Tokenizer(num_words = 1000)
+tokenizer.fit_on_texts(reviews)
+sequences = tokenizer.texts_to_sequences(reviews)
+data = pad_sequences(sequences, maxlen = 20)
+
+
+model = Sequential([
+    Dense(units = 25, activation = 'sigmoid', input_shape = (20)),
+    Dense(units = 15, activation = 'sigmoid'),
+    Dense(units = 1, activation = 'sigmoid')
+])
+
+
+model.compile(optimizer = 'adam', loss = 'binary_crossentropy', metrics = ['accuracy'])
+
+model.fit(data, labels, epochs=100, verbose = 0)
+
+#for test
+new_reviews = [
+    "This product exceeded my expectations",
+    "Complete waste of money, avoid at all costs"
+]
+
+new_sequences = tokenizer.texts_to_sequences(new_reviews)
+
+new_data = pad_sequences(new_sequences, maxlen = 20)
+
+predictions = model.predict(new_data)
+
+for i, pred in enumerate(predictions):
+    sentiment = "Positive" if pred >= 0.5 else "Negative"
+
+    print(f"Review: '{new_reviews[i]}'")
+    print(f"Predicted Sentiment: {sentiment} (Score: {pred[0]:.2f})")
